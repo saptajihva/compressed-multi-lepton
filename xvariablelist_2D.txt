@@ -1,0 +1,11 @@
+RISR    0  2  100  R_{ISR} 0.02 Plot
+NjISR   0   8   8   N_{jets}^{ISR} N_{jet} Plot
+NbISR   0   8   8   N_{bjets}^{ISR} N_{bjets} Plot
+NjS     0   8   8   N_{jets}^{S}    N_{jets} Plot
+NbS     0   8   8   N_{bjets}^{S}    N_{bjets} Plot
+MET     0   1000    50     E_{T}^{miss}   20GeV NPlot
+PTCM    0   1000    50  P_{T}^{CM}     20GeV NPlot
+PTISR   0   1000    50  P_{T}^{ISR}    20GeV Plot
+MISR    -1000   0   50  M^{ISR}         20GeV NPlot
+dphiISRI    0   3.2     128     \Delta\phi^{ISR,I} 0.025Radians Plot
+HN2S    0   2000    100 M_{T}^{S}    20GeV Plot

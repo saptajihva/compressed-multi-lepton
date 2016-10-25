@@ -1,0 +1,13 @@
+Selection for MultiTree
+
+skip if lepton_pt->size() < 2, we need at least 2 leptons here
+
+skip if leading lepton_pt < 10 GeV or sub-leading lepton_pt < 4 GeV
+
+skip if there no jet, Jets.size() < 1
+
+skip if Jets.size() + Leptons.size() < 2, it makes no sense at all
+
+skip if NL (no of leptons) < 2 || NL > 3
+
+

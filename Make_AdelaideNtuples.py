@@ -5,7 +5,7 @@ import sys, os, glob, string, shutil, os.path, fnmatch
 inputPATH="/working/andreas/MLF/"
 outputPATH="OutputNewcode/"
 
-filterroot = '*.root'
+filterroot = '*NNPDF*Z*.root'
 
 counter=0
 

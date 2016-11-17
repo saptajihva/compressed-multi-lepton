@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
     TFile* F = new TFile(filenames[i].c_str(),"READ");
 TH1D *h1 = (TH1D*)F->Get("NumberEvents");
 double nEvents = h1->GetBinContent(2);
-cout << "Total Number of Events: " << nEvents << endl;
+//cout << "Total Number of Events: " << nEvents << endl;
 	TObjLink* link = F->GetListOfKeys()->FirstLink();
     vector<string> treenames;
     while(link){
@@ -130,7 +130,7 @@ std::cout << "Treesize: " << Nt << std::endl;
       //CompressedHiggsinoNtuple2L* ntuple = new CompressedHiggsinoNtuple2L(chain);
       CompressedHiggsinoNtupleMultiTree* ntuple = new CompressedHiggsinoNtupleMultiTree(chain/*,nEvents*/);
       ntuple->nevents = nEvents;
-//cout << "OI!" << endl;   
+cout << "Number of Events: " << ntuple->nevents << " Luminosity: " << ntuple->luminosity << endl;   
    ntuple->WriteNtuple(string(outputFileName));
       delete ntuple;
     }

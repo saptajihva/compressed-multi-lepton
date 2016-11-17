@@ -1,4 +1,4 @@
-import os.path
+import os.path, sys
 from rootpy.plotting import F1, Hist, Hist2D, HistStack, Canvas,Legend,Pad
 from rootpy.plotting.utils import draw
 #from rootpy.interactive import wait
@@ -7,6 +7,7 @@ from rootpy.tree import Cut
 from rootpy.plotting.style import get_style, set_style
 from decimal import Decimal
 import ROOT
+ROOT.gROOT.SetBatch(True)
 style = get_style('ATLAS')
 style.SetEndErrorSize(3)
 titlesize=25
@@ -41,7 +42,7 @@ linestyle_list = ('solid','longdash','dotted','dashed','dashdot','verylongdashdo
 
 #==================== Input Files =======================# 
 
-backgroundMC_location="Btagmerging"
+backgroundMC_location=str(sys.argv[1])
 signalMC_location ="signal"
 data_location="data"
 
@@ -112,19 +113,19 @@ if dataexist is True:
 
 #====================== CUT DEFINITION ======================#
 
-cut    = Cut("Is_1L1L==1")
-cut2 = Cut("dphiISRI>0")
+cut    = Cut(" (Is_1L1L==1 && Is_OS==1)")
+cut2 = Cut("MJ > 60 && MJ < 100")
 cut3 = Cut("pT_1lep>0")
 cut4 = Cut("pT_2lep>0")
-cut5 = Cut("MET>100")
-cut6 = Cut("NjS==0")
-cut7 = Cut("NbISR==0")
-weight = Cut("weight")
+cut5 = Cut("PTISR>200")
+cut6 = Cut("NjS>1")
+cut7 = Cut("MZ > 80 && MZ <100")
+weight = Cut("weight*13.3")
 
-total = (cut & cut2 & cut3 & cut4 & cut5# & cut6 & cut7
+total = (cut & cut3 & cut4 & cut5 #& cut6 & cut7
         )
 print total
-outputfolder ="2DBtagged"
+outputfolder= str(sys.argv[2])
 
 
 for (rootfile,background_name,bg_bool) in zip(background_list,background_names_list,background_bool_list):
@@ -144,8 +145,8 @@ for (rootfile,background_name,bg_bool) in zip(background_list,background_names_l
                         print xvariable + " " + xmin + " " + xmax + " " + xnbins + " " + xtitle + " " + xytitle  
                         canvas = Canvas(width=700,height=500)
                         #canvas.SetLeftMargin(0.1)
-                        canvas.SetRightMargin(0.2)
-                        #canvas.SetTopMargin(0.2)
+                        canvas.SetRightMargin(0.15)
+                        canvas.SetTopMargin(0.05)
                         canvas.Draw()
                 
 
@@ -156,7 +157,7 @@ for (rootfile,background_name,bg_bool) in zip(background_list,background_names_l
                         print histname
                         histogram = histname + "(" + xnbins + "," + xmin +"," + xmax + "," + nbins + "," + min +"," + max + ")"
                         print histogram
-                        histname = compressed.Draw(xvariable+":"+variable + ">>" + histogram, selection = total & weight, drawstyle='COLZ')
+                        histname = compressed.Draw(xvariable+":"+variable + ">>" + histogram, selection = weight*total, drawstyle='COLZ')
                         histname.set_title(signalprocess + " " + background_name)
                         histname.GetZaxis().SetTitle("Entries/"+xytitle+"/"+ytitle)
                         histname.xaxis.SetTitle(xtitle)
@@ -173,7 +174,53 @@ for (rootfile,background_name,bg_bool) in zip(background_list,background_names_l
                         label.Draw()
                         canvas.Modified()
                         canvas.Update()
-                        canvas.Print(outputfolder + "/" + xvariable + "_" + variable + background_name +"2L.png")
+                        canvas.Print(outputfolder + "/" + xvariable + "_" + variable + "_" + background_name +"_2D_2L.png")
 
 
+for (rootfile,data_weight,data_legend,data_bool) in zip(data_list,data_weight_list,data_legend_list,data_bool_list):
+    if data_bool== "Plot":
+        data = root_open(data_location + "/" + rootfile)
+        compressed    = data.CompressedAnalysis
+        for (variable,min,max,nbins,title,ytitle,yplot) in zip(variable_list,min_list,max_list,nbins_list,title_list,ytitle_list,yplot_list):
+            if yplot=="Plot":
+                print variable + " " + min + " " + max + " " + nbins + " " + title + " " + ytitle
+                for(xvariable,xmin,xmax,xnbins,xtitle,xytitle,xplot) in zip(xvariable_list,xmin_list,xmax_list,xnbins_list,xtitle_list,xytitle_list,xplot_list):
+                    if xplot=="Plot":
+                        if xvariable == variable:
+                            continue
+                  # Canvas Variables and declaration
+                        print xvariable + " " + xmin + " " + xmax + " " + xnbins + " " + xtitle + " " + xytitle
+                        canvas = Canvas(width=700,height=500)
+                        #canvas.SetLeftMargin(0.1)
+                        canvas.SetRightMargin(0.15)
+                        canvas.SetTopMargin(0.05)
+                        canvas.Draw()
+
+
+                        #canvas.SetLogy()
+                        canvas.SetGrid()
+
+                        histname = "hist" + xvariable+"_"+variable + data_legend
+                        print histname
+                        histogram = histname + "(" + xnbins + "," + xmin +"," + xmax + "," + nbins + "," + min +"," + max + ")"
+                        print histogram
+                        histname = compressed.Draw(xvariable+":"+variable + ">>" + histogram, selection = weight*total, drawstyle='COLZ')
+                        histname.SetTitle(signalprocess + " " + data_legend)
+
+                        histname.GetZaxis().SetTitle("Entries/"+xytitle+"/"+ytitle)
+                        histname.xaxis.SetTitle(xtitle)
+                        histname.yaxis.SetTitle(title)
+                        histname.xaxis.set_label_size(15)
+                        histname.yaxis.set_label_size(20)
+                        histname.zaxis.set_title_size(20)
+                        histname.zaxis.set_label_size(10)
+                        label = ROOT.TLatex(.17,0.97,signalprocess+signaljets)
+                        label.SetTextFont(43)
+                        label.SetTextSize(18)
+                        label.SetNDC()
+                        label.Draw()
+
+                        canvas.Modified()
+                        canvas.Update()
+                        canvas.Print(outputfolder + "/" + xvariable + "_" + variable + "_" + data_legend +"_2D_2L.png")
 

@@ -423,7 +423,7 @@ void AnalysisBase<AdelaideBase>::GetJets(vector<Jet>& JETs, double pt_cut,
 //cout << "b-tag: " << jet_isBtag->at(i) << endl; 
     //if (jet_isBtag!=0) continue; // getting rid of b-tag jets
     // units MeV -> GeV
-    JET.P.SetPtEtaPhiE((jet_pt->at(i))/1000., jet_eta->at(i),
+    JET.P.SetPtEtaPhiM((jet_pt->at(i))/1000., jet_eta->at(i),
 		       jet_phi->at(i), (jet_m->at(i))/1000.); // use jet_m for jet energy
    // if((JET.P.Pt() >= pt_cut) && (fabs(JET.P.Eta()) < eta_cut || eta_cut < 0)){
       if(jet_isBtag->at(i)) JET.btag = true; // Boolean thing good to have.
@@ -443,10 +443,10 @@ void AnalysisBase<AdelaideBase>::GetLeptons(vector<TLorentzVector>& LEPs, vector
   for(int i = 0; i < Nlep; i++){
     TLorentzVector LEP;
 // need to get an energy for the leptons
-double lepe = 0;
-lepe = fabs(sqrt(pow(lepton_pt->at(i),2.) + pow(lepton_m->at(i),2.)))/1000.;
-    LEP.SetPtEtaPhiE((lepton_pt->at(i))/1000., lepton_eta->at(i),
-		    lepton_phi->at(i), lepe);
+//double lepe = 0;
+//lepe = fabs(sqrt(pow(lepton_pt->at(i),2.) + pow(lepton_m->at(i),2.)))/1000.;
+    LEP.SetPtEtaPhiM((lepton_pt->at(i))/1000., lepton_eta->at(i),
+		    lepton_phi->at(i), lepton_m->at(i));
    // if((LEP.Pt() >= pt_cut) && (fabs(LEP.Eta()) < eta_cut || eta_cut < 0)){
       LEPs.push_back(LEP);
 //elaborate if statements aren't required, I just need to use lepton_charge to get the ID 

@@ -7,5 +7,5 @@ Diboson.root    Diboson Plot
 Top.root    Top     Plot
 200_100_3L.root 200_100_3L NPlot
 200_150_3L.root 200_150_3L NPlot
-200_100_2LNJ.root 200_100_2LNJ Plot
-200_150_2LNJ.root 200_150_2LNJ Plot	
+200_100_2LNJ.root 200_100_2LNJ NPlot
+200_150_2LNJ.root 200_150_2LNJ NPlot	

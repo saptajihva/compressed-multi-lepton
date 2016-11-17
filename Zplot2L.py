@@ -87,7 +87,7 @@ if signalexist is True:
 	with open(signal_list_file) as f:
     		input                 = zip(*[line.split() for line in f])
     		signal_list           = input[0]
-   	        xs_list               = input[1]
+       	 	xs_list               = input[1]
     		k_list                = input[2]
     		efilter_list          = input[3]
     		nMC_list              = input[4]
@@ -106,15 +106,21 @@ if dataexist is True:
 
 #====================== CUT DEFINITION ======================#
     
-cut    = Cut("Is_1L1L==1 && Is_OS==1 ")
+cut    = Cut("(Is_2LNJ==1 && Is_Z==1)")
 cut2 = Cut("dphiISRI>0")
-cut3 = Cut("pT_1lep>0")
-cut4 = Cut("pT_2lep>0")
-cut5 = Cut("PTISR>200")
-weight = Cut("weight*12.3")
-#weight wweight*13.3/1000
-total = (cut & cut3 & cut4 & cut5 #& weight
-        )
+cut3 = Cut("pT_1lep>25")
+cut4 = Cut("pT_2lep>20")
+cutZ = Cut("MZ > 80 && MZ <100")
+cutISR = Cut("pTjISR1 > 100")
+cut5 = Cut("PTISR>100")
+cut6 = Cut("NjS>1")
+cut7 = Cut("MJ > 60 && MJ < 100")
+cutmass = Cut("HN2S > 100")
+weight = Cut("weight*13.3")
+
+total = (cut &  cutZ & cut5  & cut6 & cut7 & cutmass
+                )
+
 print total
 #outputfolder ="outputfolder"
 outputfolder = str(sys.argv[2])
@@ -266,9 +272,9 @@ for (variable,xmin,xmax,nbins,xtitle,ytitle) in zip(variable_list,xmin_list,xmax
    
     #=================== DRAW DATA ====================================# 
     for (dataobject,data_legend_latex) in zip(dataobjects,data_legend_list):
-       legend.AddEntry(dataobject, label = data_legend_latex)
-       dataobject.Draw("same X0")
-    
+        legend.AddEntry(dataobject, label = data_legend_latex)
+        dataobject.Draw("same X0")
+#    
     #=================== DRAW SIGNALS ====================================# 
 #    for (object,legend_latex,linestyle) in zip(objects,signal_legend_list,linestyle_list):
 #        object.SetLineColor("black")
@@ -276,7 +282,7 @@ for (variable,xmin,xmax,nbins,xtitle,ytitle) in zip(variable_list,xmin_list,xmax
 #        object.SetLineStyle(linestyle)
 #        legend.AddEntry(object,label = legend_latex,style='L')
 #        object.Draw("same X0")
-                                     
+                                
         
     #legend.Draw()
 
@@ -363,7 +369,7 @@ for (variable,xmin,xmax,nbins,xtitle,ytitle) in zip(variable_list,xmin_list,xmax
 
 
 
-    canvas.Print(outputfolder + "/" +  variable + "_2L.png")
+    canvas.Print(outputfolder + "/" +  variable + "_2LNJ_SRZ.png")
 
 
 

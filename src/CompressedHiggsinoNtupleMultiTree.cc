@@ -322,6 +322,15 @@ void CompressedHiggsinoNtupleMultiTree::InitOutputTree(){
     m_Tree->Branch("pTjS4", &m_pTjS4);
     m_Tree->Branch("bjS4", &m_bjS1);
     m_Tree->Branch("NjS", &m_NjS);
+    m_Tree->Branch("pTjISR1", &m_pTjISR1);
+    m_Tree->Branch("bjISR1", &m_bjISR1);
+    m_Tree->Branch("pTjISR2", &m_pTjISR2);
+    m_Tree->Branch("bjISR2", &m_bjISR2);
+    m_Tree->Branch("pTjISR3", &m_pTjISR3);
+    m_Tree->Branch("bjISR3", &m_bjISR3);
+    m_Tree->Branch("pTjISR4", &m_pTjISR4);
+    m_Tree->Branch("bjISR4", &m_bjISR4);
+
     m_Tree->Branch("NbS",&m_NbS);
     m_Tree->Branch("NjISR", &m_NjISR);
     m_Tree->Branch("NbISR",&m_NbISR);
@@ -440,12 +449,12 @@ void CompressedHiggsinoNtupleMultiTree::FillOutputTree(){
     // be satisfied by previous requirements
     if(Jets.size() + Leptons.size() < 2) 
         return; 
-    //cout << "Events: " << nevents << endl;
+    cout << "Events: " << nevents << endl;
     double wweight = GetEventWeight(); // put in weights for mc & data
     double lumisample = nevents/xsec;
     double normweight = luminosity/lumisample; 
     m_weight = wweight*normweight; 	 
-    //cout << "wweight: " << wweight << " luminosity: " << luminosity <<" lumisample: " << lumisample << " normweight: " << normweight << " weight: " << m_weight << endl;
+    cout << "wweight: " << wweight << " luminosity: " << luminosity <<" lumisample: " << lumisample << " normweight: " << normweight << " weight: " << m_weight << endl;
     // MET-related observables
     //  m_TrkMET = TrackMET;
     m_MET = ETMiss.Pt();
@@ -552,6 +561,15 @@ void CompressedHiggsinoNtupleMultiTree::FillOutputTree(){
     m_pTjS2 = 0.;
     m_pTjS3 = 0.;
     m_pTjS4 = 0.;
+    m_pTjISR1 = 0;
+    m_pTjISR2 = 0;
+    m_pTjISR3 = 0;
+    m_pTjISR4 = 0;
+    m_bjISR1 = 0;
+    m_bjISR2 = 0;
+    m_bjISR3 = 0;
+    m_bjISR4 = 0;
+
     // assuming pT ordered jets
     for(int i = 0; i < int(Jets.size()); i++){
         //        cout << Jets[i].btag << endl;
@@ -577,6 +595,23 @@ void CompressedHiggsinoNtupleMultiTree::FillOutputTree(){
         } else {
             m_NjISR++;
             if (Jets[i].btag) m_NbISR ++;
+            if(m_NjISR == 1){
+                m_pTjISR1 = Jets[i].P.Pt();
+                m_bjISR1 = Jets[i].btag;  
+            }        
+            if(m_NjISR == 2){
+                m_pTjISR2 = Jets[i].P.Pt();
+                m_bjISR2 = Jets[i].btag;
+            }
+            if(m_NjISR == 3){
+                m_pTjISR3 = Jets[i].P.Pt();
+                m_bjISR3 = Jets[i].btag;
+            }
+            if(m_NjISR == 4){
+                m_pTjISR4 = Jets[i].P.Pt();
+                m_bjISR4 = Jets[i].btag;
+            }
+            
         }
     }
 
@@ -584,7 +619,7 @@ void CompressedHiggsinoNtupleMultiTree::FillOutputTree(){
     m_Is_2LNJ = false;
     m_Is_1L1L = false;
     m_Is_2L1L = false;
-   // m_Is_Z = false;
+    // m_Is_Z = false;
     int NL = Leptons.size();
     // only analyze these events for now
     if(NL < 2 || NL > 3)
@@ -594,16 +629,16 @@ void CompressedHiggsinoNtupleMultiTree::FillOutputTree(){
         // SS and/or OF leptons
         //if(LepIDs[0]+LepIDs[1] != 0){
         if(m_NjS==0) {    
-        m_Is_1L1L = true;
+            m_Is_1L1L = true;
         } else{
             // 2LNJ
-        m_Is_2LNJ = true;
-            
+            m_Is_2LNJ = true;
+
         }
     }
     if(NL == 3){
         // we don't care about making a Z anymore because we can invoke my new Is_Z to sort out the candidates, but I do want at least 2 different signs
-       // if(LepIDs[0]+LepIDs[1] == 0 ||
+        // if(LepIDs[0]+LepIDs[1] == 0 ||
         //        LepIDs[0]+LepIDs[2] == 0 ||
         //        LepIDs[1]+LepIDs[2] == 0){
         if(signbit(LepIDs[0])!=signbit(LepIDs[1]) || signbit(LepIDs[1])!=signbit(LepIDs[2]) || signbit(LepIDs[0])!=signbit(LepIDs[2]))  m_Is_2L1L = true;
@@ -621,10 +656,10 @@ void CompressedHiggsinoNtupleMultiTree::FillOutputTree(){
         for(int i = 0; i < NJ; i++){
             if(JETS_comb->GetFrame(jetID[i]) == *J_comb){
                 JETS_2LNJ->AddLabFrameFourVector(Jets[i].P);
-             //   if (Jets[i].btag==1) NbS++;
+                //   if (Jets[i].btag==1) NbS++;
             } else {
                 vISR += Jets[i].P;
-               // if(Jets[i].btag==1) NbISR++;
+                // if(Jets[i].btag==1) NbISR++;
             }
         }
 
@@ -771,7 +806,7 @@ void CompressedHiggsinoNtupleMultiTree::FillOutputTree(){
         m_H11Ca = 2.*Ia_2LNJ->GetFourVector(*Ca_2LNJ).P();
         m_H11Cb = 2.*Ib_2LNJ->GetFourVector(*Cb_2LNJ).P();
         m_cosC  = Ca_2LNJ->GetCosDecayAngle();
-        
+
         if((signbit(LepIDs[0]) && !signbit(LepIDs[1])) || (!signbit(LepIDs[0]) && signbit(LepIDs[1]))) m_Is_OS = 1;
         if(LepIDs[0]+LepIDs[1] == 0) m_Is_Z = 1;
         m_MZ = Z_2LNJ->GetMass();
@@ -806,6 +841,7 @@ void CompressedHiggsinoNtupleMultiTree::FillOutputTree(){
         m_H11Ca = 2.*Ia_1L1L->GetFourVector(*Ca_1L1L).P();
         m_H11Cb = 2.*Ib_1L1L->GetFourVector(*Cb_1L1L).P();
         m_cosC  = Ca_1L1L->GetCosDecayAngle();
+    
     }
 
     if(m_Is_2L1L){
@@ -836,8 +872,8 @@ void CompressedHiggsinoNtupleMultiTree::FillOutputTree(){
         m_cosC  = Ca_2L1L->GetCosDecayAngle();
         m_Is_OS = 1;
         if(LepIDs[0]+LepIDs[1] == 0 ||
-        LepIDs[0]+LepIDs[2] == 0 ||
-        LepIDs[1]+LepIDs[2] == 0) m_Is_Z=1;
+                LepIDs[0]+LepIDs[2] == 0 ||
+                LepIDs[1]+LepIDs[2] == 0) m_Is_Z=1;
         m_MZ = Z_2L1L->GetMass();
         m_cosZ = Z_2L1L->GetCosDecayAngle();
     }
@@ -901,4 +937,4 @@ void CompressedHiggsinoNtupleMultiTree::FillOutputTree(){
 
     if(m_Tree)
         m_Tree->Fill();
-}
+    }

@@ -1,4 +1,4 @@
-import os.path, sys
+import os.path, sys 
 from rootpy.plotting import F1, Hist, Hist2D, HistStack, Canvas,Legend,Pad
 from rootpy.plotting.utils import draw
 #from rootpy.interactive import wait
@@ -28,8 +28,8 @@ labelmargin=0.18 #Labeling
 lumipb = 12300 #pb-1 (10 fb-1)
 lumifb = lumipb/1000.0
 sqrts  = 13
-signalprocess= 'Three Lepton'
-signaljets=" with ISR "
+signalprocess= 'Two Lepton'
+signaljets= 'with ISR'
 
 yminimum = 1e0
 ymaximum = 1e4
@@ -113,16 +113,19 @@ if dataexist is True:
 
 #====================== CUT DEFINITION ======================#
 
-cut    = Cut("Is_2L1L==1 && Is_Z==1")
+cut    = Cut("(Is_2LNJ==1 && Is_Z==1)")
 cut2 = Cut("dphiISRI>0")
-cut3 = Cut("pT_1lep>0")
-cut4 = Cut("pT_2lep>0")
-cut4b = Cut("pT_3lep>0")
+cut3 = Cut("pT_1lep>25")
+cut4 = Cut("pT_2lep>20")
+cutZ = Cut("MZ > 80 && MZ <100")
+cutISR = Cut("pTjISR1 > 100")
 cut5 = Cut("PTISR>200")
-cut6 = Cut("NjS==0")
-cut7 = Cut("NjISR==0")
+cut6 = Cut("NjS>1")
+cut7 = Cut("MJ > 60 && MJ < 100")
+cutmass = Cut("HN2S > 100")
 weight = Cut("weight*13.3")
-total = (cut &  cut3 & cut4 & cut4b & cut5 #& cut6 & cut7
+
+total = (cut &  cutZ & cut5  & cut6 & cut7 & cutmass
         )
 print total
 outputfolder = str(sys.argv[2])
@@ -133,20 +136,22 @@ for (rootfile,background_name,bg_bool) in zip(background_list,background_names_l
         background = root_open(backgroundMC_location + "/" + rootfile)
         compressed    = background.CompressedAnalysis
         for (variable,min,max,nbins,title,ytitle,yplot) in zip(variable_list,min_list,max_list,nbins_list,title_list,ytitle_list,yplot_list):
-            if yplot=="Plot":
+            if yplot == "Plot":
+                
                 print variable + " " + min + " " + max + " " + nbins + " " + title + " " + ytitle  
                 for(xvariable,xmin,xmax,xnbins,xtitle,xytitle,xplot) in zip(xvariable_list,xmin_list,xmax_list,xnbins_list,xtitle_list,xytitle_list,xplot_list):
                     if xplot=="Plot":
-                        if xvariable == variable:
-                            continue
-                  # Canvas Variables and declaration
+                        if xvariable==variable: 
+                            continue 
+                        # Canvas Variables and declaration
+                        
                         print xvariable + " " + xmin + " " + xmax + " " + xnbins + " " + xtitle + " " + xytitle  
                         canvas = Canvas(width=700,height=500)
                         #canvas.SetLeftMargin(0.1)
                         canvas.SetRightMargin(0.15)
                         canvas.SetTopMargin(0.05)
                         canvas.Draw()
-
+                
 
                         #canvas.SetLogy()
                         canvas.SetGrid()
@@ -156,24 +161,23 @@ for (rootfile,background_name,bg_bool) in zip(background_list,background_names_l
                         histogram = histname + "(" + xnbins + "," + xmin +"," + xmax + "," + nbins + "," + min +"," + max + ")"
                         print histogram
                         histname = compressed.Draw(xvariable+":"+variable + ">>" + histogram, selection = weight*total, drawstyle='COLZ')
-                        histname.SetTitle(signalprocess + " " + background_name)
-
+                        histname.set_title(signalprocess + " " + background_name)
                         histname.GetZaxis().SetTitle("Entries/"+xytitle+"/"+ytitle)
                         histname.xaxis.SetTitle(xtitle)
                         histname.yaxis.SetTitle(title)
-                        histname.xaxis.set_label_size(15)
+                        histname.xaxis.set_label_size(20)
                         histname.yaxis.set_label_size(20)
                         histname.zaxis.set_title_size(20)
                         histname.zaxis.set_label_size(10)
-                        label = ROOT.TLatex(.17,0.97,signalprocess+signaljets)
+                        histname.set_title_size(20)
+                        label = ROOT.TLatex(.17,.97, signalprocess + signaljets)
                         label.SetTextFont(43)
                         label.SetTextSize(18)
                         label.SetNDC()
                         label.Draw()
-
                         canvas.Modified()
                         canvas.Update()
-                        canvas.Print(outputfolder + "/" + xvariable + "_" + variable + "_" + background_name +"_2D_3L.png")
+                        canvas.Print(outputfolder + "/" + xvariable + "_" + variable + "_" + background_name +"_2LNJ_SRZ2D.png")
 
 
 for (rootfile,data_weight,data_legend,data_bool) in zip(data_list,data_weight_list,data_legend_list,data_bool_list):
@@ -221,5 +225,5 @@ for (rootfile,data_weight,data_legend,data_bool) in zip(data_list,data_weight_li
 
                         canvas.Modified()
                         canvas.Update()
-                        canvas.Print(outputfolder + "/" + xvariable + "_" + variable + "_" + data_legend +"_2D_3L.png")
+                        canvas.Print(outputfolder + "/" + xvariable + "_" + variable + "_" + data_legend +"_2LNJ_SRZ2D.png")
 

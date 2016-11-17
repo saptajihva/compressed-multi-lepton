@@ -7,6 +7,7 @@ from rootpy.tree import Cut
 from rootpy.plotting.style import get_style, set_style
 from decimal import Decimal
 import ROOT
+ROOT.gROOT.SetBatch(True)
 style = get_style('ATLAS')
 style.SetEndErrorSize(3)
 titlesize=25
@@ -46,9 +47,9 @@ data_location="data"
 
 dataexist = os.path.isfile("data.txt")
 signalexist = os.path.isfile("signals.txt")
-backgroundexist = os.path.isfile("backgrounds.txt")
+backgroundexist = os.path.isfile("backgrounds3L.txt")
 
-if backgroundexist is True: background_list_file = "backgrounds.txt"
+if backgroundexist is True: background_list_file = "backgrounds3L.txt"
 if signalexist is True: signal_list_file="signals.txt"
 if dataexist is True: data_list_file = "data.txt"
 
@@ -84,14 +85,14 @@ if backgroundexist is True:
 
 if signalexist is True:
 	with open(signal_list_file) as f:
-    		input                 = zip(*[line.split() for line in f])
-    		signal_list           = input[0]
-   	 	xs_list               = input[1]
-    		k_list                = input[2]
-    		efilter_list          = input[3]
-    		nMC_list              = input[4]
-    		signal_legend_list    = input[5]
-    		bool_list             = input[6]
+            input                 = zip(*[line.split() for line in f])
+            signal_list           = input[0]
+            xs_list               = input[1]
+            k_list                = input[2]
+            efilter_list          = input[3]
+            nMC_list              = input[4]
+            signal_legend_list    = input[5]
+            bool_list             = input[6]
 
 if dataexist is True:
 	with open(data_list_file) as f:
@@ -112,9 +113,9 @@ cut4 = Cut("pT_2lep>0")
 cut5 = Cut("pT_3lep>0")
 cut6 = Cut("PTISR>200")
 outputfolder =str(sys.argv[2])
-weight = Cut("weight*(13.3/1000)")
+weight = Cut("weight*(13.3)")
 #weight = wweight*13.3*0.001
-total = (cut & cut3 & cut4 & cut5 & cut6  & weight)
+total = (cut & cut3 & cut4 & cut5 & cut6 )
 #jetcut = Cut("nJets[0] == 0")
 
 #sign = lambda a: (a>0) - (a<0)
@@ -204,7 +205,7 @@ for (variable,xmin,xmax,nbins,xtitle,ytitle) in zip(variable_list,xmin_list,xmax
             histogram = histname +"(" +nbins + "," + xmin + "," + xmax + ")"
 
 
-            histname = compressed.Draw(variable + ">>" + histogram, selection = total    ,
+            histname = compressed.Draw(variable + ">>" + histogram, selection = weight*total    ,
                                                                              drawstyle = 'hist'  ,
                                                                              fillstyle = 'solid' ,
                                                                              linecolor = 'black',
@@ -217,21 +218,21 @@ for (variable,xmin,xmax,nbins,xtitle,ytitle) in zip(variable_list,xmin_list,xmax
 
     
     #=================== DATA SAMPLES ====================================# 
-#    objects     = []
-#    dataobjects = []
-#    for (datafilename,data_weight,data_bool) in zip(data_list,data_weight_list,data_bool_list):
-#        print datafilename,data_weight,data_bool
-#        if data_bool == "Plot":
-#            print "datafilename: ", datafilename
-#            data=root_open(data_location + "/" + datafilename)
-#            treesSR = data.trees_SR_
-#            datacut = cut 
-#            if data_weight != "1":
-#                print "WARNING: DATA WEIGHT IS NOT 1 PLEASE CHECK IF YOU DO NOT INTEND TO WEIGHT THE DATA"
-#
-#            histogram ="hist("+ nbins+ "," +xmin + "," + xmax + ")"
-#            datahist = treesSR.Draw(variable + ">>"+ histogram,selection =datacut)
-#            dataobjects.append(datahist)
+    objects     = []
+    dataobjects = []
+    for (datafilename,data_weight,data_bool) in zip(data_list,data_weight_list,data_bool_list):
+        print datafilename,data_weight,data_bool
+        if data_bool == "Plot":
+            print "datafilename: ", datafilename
+            data=root_open(data_location + "/" + datafilename)
+            treesSR = data.CompressedAnalysis
+            datacut = total 
+            if data_weight != "1":
+                print "WARNING: DATA WEIGHT IS NOT 1 PLEASE CHECK IF YOU DO NOT INTEND TO WEIGHT THE DATA"
+
+            histogram ="hist("+ nbins+ "," +xmin + "," + xmax + ")"
+            datahist = treesSR.Draw(variable + ">>"+ histogram,selection =datacut)
+            dataobjects.append(datahist)
 
 
     #=================== SIGNAL SAMPLES ==================================# 
@@ -257,9 +258,9 @@ for (variable,xmin,xmax,nbins,xtitle,ytitle) in zip(variable_list,xmin_list,xmax
 
    
     #=================== DRAW DATA ====================================# 
-#    for (dataobject,data_legend_latex) in zip(dataobjects,data_legend_list):
- #       legend.AddEntry(dataobject, label = data_legend_latex)
-#        dataobject.Draw("same X0")
+    for (dataobject,data_legend_latex) in zip(dataobjects,data_legend_list):
+       legend.AddEntry(dataobject, label = data_legend_latex)
+       dataobject.Draw("same X0")
 #    
     #=================== DRAW SIGNALS ====================================# 
 #    for (object,legend_latex,linestyle) in zip(objects,signal_legend_list,linestyle_list):
@@ -355,7 +356,7 @@ for (variable,xmin,xmax,nbins,xtitle,ytitle) in zip(variable_list,xmin_list,xmax
 
 
 
-    canvas.Print(outputfolder  + variable + "3L.png")
+    canvas.Print(outputfolder + "/"  + variable + "_3L.png")
 
 
 
